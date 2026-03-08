@@ -1,6 +1,7 @@
 import os
 import shutil
 from datetime import datetime
+import sys
 
 folders_ext = {
     "Python": (".py",),
@@ -12,9 +13,14 @@ folders_ext = {
 def move_files(src, dest_folder, log, moved, skipped, errors):
     
     try:
-        shutil.move(src,dest_folder)
-        log.write(f"[MOVED] {os.path.basename(src)}\n")
-        moved +=1
+        if "--dry-run" in sys.argv:
+            message = f"[DRY-RUN] {os.path.basename(src)} -> {dest_folder}\n"
+            log.write(message)
+            print(message)
+        else :
+            shutil.move(src,dest_folder)
+            log.write(f"[MOVED] {os.path.basename(src)}\n")
+            moved +=1
     except Exception as e :
         log.write(f"[ERRORS] {os.path.basename(src)} : {e}\n")
         errors +=1
@@ -28,7 +34,9 @@ def main():
     today_date = datetime.now().strftime("%m-%y-%d")
     moved_file_name = f"moved_file_{today_date}"
     organized_file = os.path.join(desktop,moved_file_name)
-    os.makedirs(organized_file,exist_ok=True)
+
+    if not "--dry-run" in sys.argv:
+        os.makedirs(organized_file,exist_ok=True)
 
     log_file = os.path.join(organized_file,"Log_file.txt")
 
@@ -36,7 +44,7 @@ def main():
     skipped = 0
     errors = 0
 
-    with open(log_file, 'a' , encoding="UTF_8") as log :
+    with open(log_file, 'a' , encoding="utf_8") as log :
         log.write("----------------------------------\n")
         log.write(f"The process started at {today_date}\n")
 
@@ -52,23 +60,27 @@ def main():
             for folder,ext in folders_ext.items():
                 if file.endswith(ext):
                     folder_path = os.path.join(organized_file,folder)
-                    destintion = os.path.join(folder_path,file)
+                    destination = os.path.join(folder_path,file)
 
-                    os.makedirs(folder_path,exist_ok=True)
-                    moved, skipped, errors = move_files(file_path,destintion,log,moved,skipped,errors)
+                    if not "--dry-run" in sys.argv:
+                        os.makedirs(folder_path,exist_ok=True)
+                    moved, skipped, errors = move_files(file_path,destination,log,moved,skipped,errors)
+
                     folder_found = True
+                    break
 
             if not folder_found :
                 other_folder = os.path.join(organized_file,"Others")
                 des_other = os.path.join(other_folder,file)
-                os.makedirs(other_folder,exist_ok=True)
+                if not "--dry-run" in sys.argv:
+                    os.makedirs(other_folder,exist_ok=True)
                 moved, skipped, errors = move_files(file_path,des_other,log,moved,skipped,errors)
 
         log.write(f"-->\nMOVED : {moved}\nSKIPPED : {skipped}\nERRORS : {errors}\n")
 
     print(f"MOVED : {moved}")
     print(f"SKIPPED : {skipped}")
-    print(f"EROORS : {errors}")
+    print(f"ERRORS : {errors}")
 
 
 main()
