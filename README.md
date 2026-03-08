@@ -1,6 +1,6 @@
 # 🗂 Desktop File Organizer
 
-A Python automation script that organizes your Desktop files by extension — automatically categorizing, moving, and logging everything in one run.
+A Python automation script that organizes your Desktop files by extension, automatically categorizing, moving, and logging everything in one run.
 
 ---
 
@@ -46,7 +46,7 @@ folders_ext = {
 ## Requirements
 
 - **Python 3.8+**
-- **Standard Library only** — no external dependencies required:
+- **Standard Library only**  no external dependencies required:
   - `os`
   - `shutil`
   - `datetime`
